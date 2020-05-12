@@ -32,7 +32,11 @@ class CollisionMapCreator : public WorldPlugin
     node = transport::NodePtr(new transport::Node());
     world = _parent;
     // Initialize the node with the world name
+  #if GAZEBO_MAJOR_VERSION >= 8
+    node->Init(world->Name());
+  #else
     node->Init(world->GetName());
+  #endif
     std::cout << "Subscribing to: " << "~/collision_map/command" << std::endl;
     commandSubscriber = node->Subscribe("~/collision_map/command",
       &CollisionMapCreator::create, this);
@@ -88,7 +92,11 @@ class CollisionMapCreator : public WorldPlugin
     start.Z(msg->height());
     end.Z(0.001);
 
+  #if GAZEBO_MAJOR_VERSION >= 8
+    gazebo::physics::PhysicsEnginePtr engine = world->Physics();
+  #else
     gazebo::physics::PhysicsEnginePtr engine = world->GetPhysicsEngine();
+  #endif
     engine->InitForThread();
     gazebo::physics::RayShapePtr ray =
       boost::dynamic_pointer_cast<gazebo::physics::RayShape>(
@@ -126,8 +134,8 @@ class CollisionMapCreator : public WorldPlugin
     {
       boost::gil::gray8_view_t view = image._view;
 
-      // Write to png 
-      // boost::gil::png_write_view(msg->filename(), view); 
+      // Write to png
+      // boost::gil::png_write_view(msg->filename(), view);
       // Write to pgm (pnm p2)
       pgm_write_view(msg->filename(), view);
     }
